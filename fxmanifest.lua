@@ -1,12 +1,11 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'qb-hud'
+description 'qb-hud convert to esx'
 version '2.1.0'
 
 shared_scripts {
-    '@qb-core/shared/locale.lua',
-    'locales/en.lua',
+	'@es_extended/imports.lua',
     'config.lua'
 }
 

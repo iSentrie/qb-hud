@@ -1,25 +1,22 @@
-local QBCore = exports['qb-core']:GetCoreObject()
 local ResetStress = false
 
-QBCore.Commands.Add('cash', 'Check Cash Balance', {}, false, function(source, args)
-    local Player = QBCore.Functions.GetPlayer(source)
-    local cashamount = Player.PlayerData.money.cash
-    TriggerClientEvent('hud:client:ShowAccounts', source, 'cash', cashamount)
-end)
+ESX.RegisterCommand('cash', 'user', function(xPlayer, args, showError)
+    local cashamount = xPlayer.getMoney()
+    TriggerClientEvent('hud:client:ShowAccounts', xPlayer.source, 'cash', cashamount)
+end, false, {help = 'Check Cash Balance'})
 
-QBCore.Commands.Add('bank', 'Check Bank Balance', {}, false, function(source, args)
-    local Player = QBCore.Functions.GetPlayer(source)
-    local bankamount = Player.PlayerData.money.bank
-    TriggerClientEvent('hud:client:ShowAccounts', source, 'bank', bankamount)
-end)
+ESX.RegisterCommand('bank', 'user', function(xPlayer, args, showError)
+    local bankamount = xPlayer.getAccount('bank').money
+    TriggerClientEvent('hud:client:ShowAccounts', xPlayer.source, 'bank', bankamount)
+end, false, {help = 'Check Bank Balance'})
 
-QBCore.Commands.Add("dev", "Enable/Disable developer Mode", {}, false, function(source, args)
-    TriggerClientEvent("qb-admin:client:ToggleDevmode", source)
-end, 'admin')
+-- ESX.RegisterCommand('dev', 'admin', function(xPlayer, args, showError)
+--     TriggerClientEvent("qb-admin:client:ToggleDevmode", xPlayer.source)
+-- end, false, {help = 'Enable/Disable developer Mode'})
 
 RegisterNetEvent('hud:server:GainStress', function(amount)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = ESX.GetPlayerFromId(src)
     local newStress
     if not Player or (Config.DisablePoliceStress and Player.PlayerData.job.name == 'police') then return end
     if not ResetStress then
@@ -36,12 +33,12 @@ RegisterNetEvent('hud:server:GainStress', function(amount)
     end
     Player.Functions.SetMetaData('stress', newStress)
     TriggerClientEvent('hud:client:UpdateStress', src, newStress)
-    TriggerClientEvent('QBCore:Notify', src, Lang:t("notify.stress_gain"), 'error', 1500)
+    xPlayer.showNotification(_U("stress_gain"))
 end)
 
 RegisterNetEvent('hud:server:RelieveStress', function(amount)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = ESX.GetPlayerFromId(src)
     local newStress
     if not Player then return end
     if not ResetStress then
@@ -58,18 +55,18 @@ RegisterNetEvent('hud:server:RelieveStress', function(amount)
     end
     Player.Functions.SetMetaData('stress', newStress)
     TriggerClientEvent('hud:client:UpdateStress', src, newStress)
-    TriggerClientEvent('QBCore:Notify', src, Lang:t("notify.stress_removed"))
+    xPlayer.showNotification(_U("stress_removed"))
 end)
 
-QBCore.Functions.CreateCallback('hud:server:HasHarness', function(source, cb)
-    local Ply = QBCore.Functions.GetPlayer(source)
-    local Harness = Ply.Functions.GetItemByName("harness")
+ESX.RegisterServerCallback('hud:server:HasHarness', function(source, cb)
+    local Ply = ESX.GetPlayerFromId(source)
+    local Harness = xPlayer.getInventoryItem("harness")
     if Harness ~= nil then
         cb(true)
     else
         cb(false)
     end
 end)
-QBCore.Functions.CreateCallback('hud:server:getMenu', function(source, cb)
+ESX.RegisterServerCallback('hud:server:getMenu', function(source, cb)
     cb(Config.Menu)
-end) 
+end)
